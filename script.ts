@@ -1,3 +1,5 @@
+// src/script.ts
+
 // Connection to Solana devnet
 const connection = new solanaWeb3.Connection('https://api.devnet.solana.com', 'confirmed');
 
@@ -5,8 +7,8 @@ const connection = new solanaWeb3.Connection('https://api.devnet.solana.com', 'c
 const PROGRAM_ID = new solanaWeb3.PublicKey('DfCSQQ6a3CTHf92X9YF7MiitMRbNaZZfbgFZ4yQrbcCd');
 
 // Derive the lottery account PDA
-async function getLotteryAccount() {
-    const [lotteryPDA, _] = await solanaWeb3.PublicKey.findProgramAddress(
+async function getLotteryAccount(): Promise<solanaWeb3.PublicKey> {
+    const [lotteryPDA] = await solanaWeb3.PublicKey.findProgramAddress(
         [Buffer.from('lottery')],
         PROGRAM_ID
     );
@@ -14,8 +16,8 @@ async function getLotteryAccount() {
 }
 
 // Derive the user ticket account PDA
-async function getUserTicketAccount(userPublicKey) {
-    const [userTicketPDA, _] = await solanaWeb3.PublicKey.findProgramAddress(
+async function getUserTicketAccount(userPublicKey: solanaWeb3.PublicKey): Promise<solanaWeb3.PublicKey> {
+    const [userTicketPDA] = await solanaWeb3.PublicKey.findProgramAddress(
         [Buffer.from('user_ticket'), userPublicKey.toBuffer()],
         PROGRAM_ID
     );
@@ -23,16 +25,24 @@ async function getUserTicketAccount(userPublicKey) {
 }
 
 // Derive the user referral account PDA
-async function getUserReferralAccount(userPublicKey) {
-    const [userReferralPDA, _] = await solanaWeb3.PublicKey.findProgramAddress(
+async function getUserReferralAccount(userPublicKey: solanaWeb3.PublicKey): Promise<solanaWeb3.PublicKey> {
+    const [userReferralPDA] = await solanaWeb3.PublicKey.findProgramAddress(
         [Buffer.from('user_referral'), userPublicKey.toBuffer()],
         PROGRAM_ID
     );
     return userReferralPDA;
 }
 
+// Interface for lottery data
+interface LotteryData {
+    totalParticipants: number;
+    activeTickets: number;
+    totalRevenue: number;
+    ticketPrice: number;
+}
+
 // Fetch lottery data
-async function fetchLotteryData() {
+async function fetchLotteryData(): Promise<LotteryData> {
     try {
         const lotteryAccount = await getLotteryAccount();
         const accountInfo = await connection.getAccountInfo(lotteryAccount);
@@ -62,7 +72,7 @@ async function fetchLotteryData() {
 }
 
 // Fetch referral earnings
-async function fetchReferralEarnings(userPublicKey) {
+async function fetchReferralEarnings(userPublicKey: solanaWeb3.PublicKey): Promise<number> {
     try {
         const referralAccount = await getUserReferralAccount(userPublicKey);
         const accountInfo = await connection.getAccountInfo(referralAccount);
@@ -80,40 +90,60 @@ async function fetchReferralEarnings(userPublicKey) {
     }
 }
 
+// Interface for recent draw data
+interface RecentDraw {
+    number: number;
+    date: string;
+    l1Referrals: number;
+    l2Referrals: number;
+    l1Volume: number;
+    l2Volume: number;
+}
+
 // Mock recent draws
-function fetchRecentDraws() {
+function fetchRecentDraws(): RecentDraw[] {
     return [
         { number: 256, date: '2024-03-15', l1Referrals: 15, l2Referrals: 32, l1Volume: 150.50, l2Volume: 275.00 }
     ];
 }
 
+// Interface for UI data
+interface UIData {
+    totalParticipants: number;
+    activeTickets: number;
+    totalRevenue: number;
+    referralEarnings: number;
+    ticketPrice: number;
+    recentDraws: RecentDraw[];
+}
+
 // Populate the UI
-function populateUI(data) {
-    document.getElementById('total-participants').textContent = data.totalParticipants;
-    document.getElementById('active-tickets').textContent = data.activeTickets;
-    document.getElementById('total-revenue').textContent = `${data.totalRevenue.toFixed(2)} SOL`;
-    document.getElementById('referral-earnings').textContent = `${data.referralEarnings.toFixed(2)} SOL`;
-    document.getElementById('ticket-price').textContent = `${data.ticketPrice.toFixed(2)} SOL`;
+function populateUI(data: UIData): void {
+    document.getElementById('total-participants')!.textContent = data.totalParticipants.toString();
+    document.getElementById('active-tickets')!.textContent = data.activeTickets.toString();
+    document.getElementById('total-revenue')!.textContent = `${data.totalRevenue.toFixed(2)} SOL`;
+    document.getElementById('referral-earnings')!.textContent = `${data.referralEarnings.toFixed(2)} SOL`;
+    document.getElementById('ticket-price')!.textContent = `${data.ticketPrice.toFixed(2)} SOL`;
     if (data.recentDraws.length > 0) {
         const draw = data.recentDraws[0];
-        document.getElementById('draw-number-1').textContent = draw.number;
-        document.getElementById('draw-date-1').textContent = draw.date;
-        document.getElementById('l1-referrals-1').textContent = draw.l1Referrals;
-        document.getElementById('l2-referrals-1').textContent = draw.l2Referrals;
-        document.getElementById('l1-volume-1').textContent = `${draw.l1Volume.toFixed(2)} SOL`;
-        document.getElementById('l2-volume-1').textContent = `${draw.l2Volume.toFixed(2)} SOL`;
+        document.getElementById('draw-number-1')!.textContent = draw.number.toString();
+        document.getElementById('draw-date-1')!.textContent = draw.date;
+        document.getElementById('l1-referrals-1')!.textContent = draw.l1Referrals.toString();
+        document.getElementById('l2-referrals-1')!.textContent = draw.l2Referrals.toString();
+        document.getElementById('l1-volume-1')!.textContent = `${draw.l1Volume.toFixed(2)} SOL`;
+        document.getElementById('l2-volume-1')!.textContent = `${draw.l2Volume.toFixed(2)} SOL`;
     }
 }
 
 // Wallet connection
-document.getElementById('connect-wallet').addEventListener('click', async () => {
+document.getElementById('connect-wallet')!.addEventListener('click', async () => {
     try {
         if (window.solana && window.solana.isPhantom) {
             await window.solana.connect();
-            const userPublicKey = window.solana.publicKey;
+            const userPublicKey = window.solana.publicKey as solanaWeb3.PublicKey;
             console.log('Connected to wallet:', userPublicKey.toString());
-            document.getElementById('admin-content').classList.remove('hidden');
-            document.getElementById('connect-wallet').textContent = 'Wallet Connected';
+            document.getElementById('admin-content')!.classList.remove('hidden');
+            document.getElementById('connect-wallet')!.textContent = 'Wallet Connected';
 
             const lotteryData = await fetchLotteryData();
             const referralEarnings = await fetchReferralEarnings(userPublicKey);
@@ -136,10 +166,12 @@ document.getElementById('connect-wallet').addEventListener('click', async () => 
 });
 
 // Generate tickets
-document.getElementById('generate-tickets').addEventListener('click', async () => {
+document.getElementById('generate-tickets')!.addEventListener('click', async () => {
     try {
-        const ticketCount = parseInt(document.getElementById('ticket-count').value);
-        const referralAddress = document.getElementById('referral-address').value;
+        const ticketCountInput = document.getElementById('ticket-count') as HTMLInputElement;
+        const referralAddressInput = document.getElementById('referral-address') as HTMLInputElement;
+        const ticketCount = parseInt(ticketCountInput.value);
+        const referralAddress = referralAddressInput.value;
         if (!ticketCount || ticketCount <= 0) {
             alert('Please enter a valid number of tickets.');
             return;
@@ -149,12 +181,12 @@ document.getElementById('generate-tickets').addEventListener('click', async () =
             return;
         }
 
-        const userPublicKey = window.solana.publicKey;
+        const userPublicKey = window.solana.publicKey as solanaWeb3.PublicKey;
         const lotteryAccount = await getLotteryAccount();
         const userTicketAccount = await getUserTicketAccount(userPublicKey);
         const userReferralAccount = await getUserReferralAccount(userPublicKey);
 
-        const accounts = [
+        const accounts: solanaWeb3.AccountMeta[] = [
             { pubkey: lotteryAccount, isSigner: false, isWritable: true },
             { pubkey: userTicketAccount, isSigner: false, isWritable: true },
             { pubkey: userReferralAccount, isSigner: false, isWritable: true },
@@ -162,7 +194,7 @@ document.getElementById('generate-tickets').addEventListener('click', async () =
             { pubkey: solanaWeb3.SystemProgram.programId, isSigner: false, isWritable: false },
         ];
 
-        let instructionData = Buffer.alloc(9);
+        const instructionData = Buffer.alloc(9);
         instructionData.writeUInt8(1, 0); // buyTickets instruction index
         instructionData.writeBigUInt64LE(BigInt(ticketCount), 1);
 
@@ -188,9 +220,10 @@ document.getElementById('generate-tickets').addEventListener('click', async () =
 });
 
 // Set ticket price
-document.getElementById('set-ticket-price').addEventListener('click', async () => {
+document.getElementById('set-ticket-price')!.addEventListener('click', async () => {
     try {
-        const newPriceSol = parseFloat(document.getElementById('new-ticket-price').value);
+        const newPriceInput = document.getElementById('new-ticket-price') as HTMLInputElement;
+        const newPriceSol = parseFloat(newPriceInput.value);
         if (!newPriceSol || newPriceSol < 0.001) {
             alert('Please enter a valid ticket price (minimum 0.001 SOL).');
             return;
@@ -200,11 +233,11 @@ document.getElementById('set-ticket-price').addEventListener('click', async () =
             return;
         }
 
-        const userPublicKey = window.solana.publicKey;
+        const userPublicKey = window.solana.publicKey as solanaWeb3.PublicKey;
         const lotteryAccount = await getLotteryAccount();
         const newPriceLamports = Math.round(newPriceSol * 1_000_000_000);
 
-        const accounts = [
+        const accounts: solanaWeb3.AccountMeta[] = [
             { pubkey: lotteryAccount, isSigner: false, isWritable: true },
             { pubkey: userPublicKey, isSigner: true, isWritable: false },
         ];
@@ -235,14 +268,14 @@ document.getElementById('set-ticket-price').addEventListener('click', async () =
 });
 
 // Draw lottery
-document.getElementById('draw-lottery').addEventListener('click', async () => {
+document.getElementById('draw-lottery')!.addEventListener('click', async () => {
     try {
         if (!window.solana || !window.solana.publicKey) {
             alert('Please connect your wallet first.');
             return;
         }
 
-        const userPublicKey = window.solana.publicKey;
+        const userPublicKey = window.solana.publicKey as solanaWeb3.PublicKey;
         const lotteryAccount = await getLotteryAccount();
 
         // Placeholder winner accounts (implement winner selection logic in a real scenario)
@@ -250,7 +283,7 @@ document.getElementById('draw-lottery').addEventListener('click', async () => {
         const winner2 = new solanaWeb3.PublicKey('22222222222222222222222222222222');
         const winner3 = new solanaWeb3.PublicKey('33333333333333333333333333333333');
 
-        const accounts = [
+        const accounts: solanaWeb3.AccountMeta[] = [
             { pubkey: lotteryAccount, isSigner: false, isWritable: true },
             { pubkey: userPublicKey, isSigner: true, isWritable: false },
             { pubkey: winner1, isSigner: false, isWritable: true },
@@ -284,9 +317,10 @@ document.getElementById('draw-lottery').addEventListener('click', async () => {
 });
 
 // Withdraw funds
-document.getElementById('withdraw-funds').addEventListener('click', async () => {
+document.getElementById('withdraw-funds')!.addEventListener('click', async () => {
     try {
-        const amountSol = parseFloat(document.getElementById('withdraw-amount').value);
+        const amountInput = document.getElementById('withdraw-amount') as HTMLInputElement;
+        const amountSol = parseFloat(amountInput.value);
         if (!amountSol || amountSol <= 0) {
             alert('Please enter a valid amount to withdraw.');
             return;
@@ -296,11 +330,11 @@ document.getElementById('withdraw-funds').addEventListener('click', async () => 
             return;
         }
 
-        const userPublicKey = window.solana.publicKey;
+        const userPublicKey = window.solana.publicKey as solanaWeb3.PublicKey;
         const lotteryAccount = await getLotteryAccount();
         const amountLamports = Math.round(amountSol * 1_000_000_000);
 
-        const accounts = [
+        const accounts: solanaWeb3.AccountMeta[] = [
             { pubkey: lotteryAccount, isSigner: false, isWritable: true },
             { pubkey: userPublicKey, isSigner: true, isWritable: true },
         ];
