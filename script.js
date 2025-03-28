@@ -1,6 +1,3 @@
-window.Buffer = window.Buffer || require("buffer").Buffer;
-
-
 // Connection to Solana devnet
 const connection = new solanaWeb3.Connection('https://api.devnet.solana.com', 'confirmed');
 
@@ -10,7 +7,7 @@ const PROGRAM_ID = new solanaWeb3.PublicKey('DfCSQQ6a3CTHf92X9YF7MiitMRbNaZZfbgF
 // Derive the lottery account PDA
 async function getLotteryAccount() {
     const [lotteryPDA, _] = await solanaWeb3.PublicKey.findProgramAddress(
-        [Buffer.from('lottery')],
+        [solanaWeb3.Buffer.from('lottery')],
         PROGRAM_ID
     );
     return lotteryPDA;
@@ -19,7 +16,7 @@ async function getLotteryAccount() {
 // Derive the user ticket account PDA
 async function getUserTicketAccount(userPublicKey) {
     const [userTicketPDA, _] = await solanaWeb3.PublicKey.findProgramAddress(
-        [Buffer.from('user_ticket'), userPublicKey.toBuffer()],
+        [solanaWeb3.Buffer.from('user_ticket'), userPublicKey.toBuffer()],
         PROGRAM_ID
     );
     return userTicketPDA;
@@ -28,7 +25,7 @@ async function getUserTicketAccount(userPublicKey) {
 // Derive the user referral account PDA
 async function getUserReferralAccount(userPublicKey) {
     const [userReferralPDA, _] = await solanaWeb3.PublicKey.findProgramAddress(
-        [Buffer.from('user_referral'), userPublicKey.toBuffer()],
+        [solanaWeb3.Buffer.from('user_referral'), userPublicKey.toBuffer()],
         PROGRAM_ID
     );
     return userReferralPDA;
@@ -165,7 +162,7 @@ document.getElementById('generate-tickets').addEventListener('click', async () =
             { pubkey: solanaWeb3.SystemProgram.programId, isSigner: false, isWritable: false },
         ];
 
-        let instructionData = Buffer.alloc(9);
+        let instructionData = solanaWeb3.Buffer.alloc(9);
         instructionData.writeUInt8(1, 0); // buyTickets instruction index
         instructionData.writeBigUInt64LE(BigInt(ticketCount), 1);
 
@@ -212,7 +209,7 @@ document.getElementById('set-ticket-price').addEventListener('click', async () =
             { pubkey: userPublicKey, isSigner: true, isWritable: false },
         ];
 
-        const instructionData = Buffer.alloc(9);
+        const instructionData = solanaWeb3.Buffer.alloc(9);
         instructionData.writeUInt8(4, 0); // setTicketPrice instruction index
         instructionData.writeBigUInt64LE(BigInt(newPriceLamports), 1);
 
@@ -262,7 +259,7 @@ document.getElementById('draw-lottery').addEventListener('click', async () => {
             { pubkey: solanaWeb3.SystemProgram.programId, isSigner: false, isWritable: false },
         ];
 
-        const instructionData = Buffer.alloc(1);
+        const instructionData = solanaWeb3.Buffer.alloc(1);
         instructionData.writeUInt8(2, 0); // draw instruction index
 
         const transaction = new solanaWeb3.Transaction().add({
@@ -308,7 +305,7 @@ document.getElementById('withdraw-funds').addEventListener('click', async () => 
             { pubkey: userPublicKey, isSigner: true, isWritable: true },
         ];
 
-        const instructionData = Buffer.alloc(9);
+        const instructionData = solanaWeb3.Buffer.alloc(9);
         instructionData.writeUInt8(3, 0); // withdraw instruction index
         instructionData.writeBigUInt64LE(BigInt(amountLamports), 1);
 
