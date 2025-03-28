@@ -53,20 +53,22 @@
         font-size: 14px;
       }
 
-      #loading-message {
-        color: #ffffff;
-        margin-top: 10px;
-        font-size: 16px;
-      }
-
       #connect-message {
         color: #ffffff;
         margin-top: 10px;
         font-size: 16px;
       }
 
+      #loading-message {
+        color: #ffffff;
+        margin-top: 10px;
+        font-size: 16px;
+        display: none;
+      }
+
       #initialize-section {
         margin-top: 20px;
+        display: none;
       }
 
       #initialize-btn {
@@ -85,7 +87,7 @@
 
       #panel-content {
         margin-top: 20px;
-        display: flex;
+        display: none;
         flex-wrap: wrap;
         gap: 20px;
       }
@@ -167,15 +169,17 @@
     <div id="app">
       <header>
         <h1>ADMIN PANEL</h1>
-        <div id="wallet-connect"></div>
+        <div id="wallet-connect">
+          <button id="connect-wallet-btn">Connect Wallet</button>
+        </div>
       </header>
       <div id="error-message"></div>
       <div id="connect-message">Please connect your wallet to access the admin panel.</div>
-      <div id="loading-message" style="display: none;">Loading...</div>
-      <div id="initialize-section" style="display: none;">
+      <div id="loading-message">Loading...</div>
+      <div id="initialize-section">
         <button id="initialize-btn">Initialize Lottery</button>
       </div>
-      <div id="panel-content" style="display: none;">
+      <div id="panel-content">
         <div class="section" id="quick-stats">
           <h3>Quick Stats</h3>
           <div class="stat">
@@ -220,15 +224,13 @@
     <!-- Load dependencies via CDN -->
     <script src="https://unpkg.com/@solana/web3.js@1.95.3/dist/index.global.js"></script>
     <script src="https://unpkg.com/@project-serum/anchor@0.26.0/dist/index.global.js"></script>
-    <script src="https://unpkg.com/@solana/wallet-adapter-base@0.9.23/dist/index.global.js"></script>
-    <script src="https://unpkg.com/@solana/wallet-adapter-phantom@0.9.24/dist/index.global.js"></script>
-    <script src="https://unpkg.com/@solana/wallet-adapter-wallets@0.19.32/dist/index.global.js"></script>
     <script src="https://unpkg.com/buffer@6.0.3/index.js"></script>
     <script>
       // Make Buffer available globally
       window.Buffer = window.Buffer || buffer.Buffer;
 
       // DOM elements
+      const connectWalletBtn = document.getElementById("connect-wallet-btn");
       const errorMessage = document.getElementById("error-message");
       const connectMessage = document.getElementById("connect-message");
       const loadingMessage = document.getElementById("loading-message");
@@ -247,30 +249,28 @@
       const setTicketPriceBtn = document.getElementById("set-ticket-price-btn");
 
       // Wallet setup
-      const { WalletAdapterNetwork, PhantomWalletAdapter } = window;
-      const network = WalletAdapterNetwork.Devnet;
-      const wallet = new PhantomWalletAdapter();
-      let publicKey = null;
-
-      // Program setup
       const { web3, AnchorProvider, Program } = window;
-      const programID = new web3.PublicKey("DfCSQQ6a3CTHf92X9YF7MiitMRbNaZZfbgFZ4yQrbcCd");
+      let publicKey = null;
       let program = null;
       let lotteryData = null;
+      const programID = new web3.PublicKey("DfCSQQ6a3CTHf92X9YF7MiitMRbNaZZfbgFZ4yQrbcCd");
+
+      // Hardcode the authority public key (replace with the actual authority key)
+      const AUTHORITY_PUBLIC_KEY = "5wkwqRCEUoet55caXpVB6oYnuP8w8k97eqHbFfFiRdLD"; // Replace with the actual authority key
 
       // Initialize wallet connection
       function initWallet() {
-        const walletConnectDiv = document.getElementById("wallet-connect");
-        const connectButton = document.createElement("button");
-        connectButton.textContent = "Connect Wallet";
-        walletConnectDiv.appendChild(connectButton);
-
-        connectButton.addEventListener("click", async () => {
+        connectWalletBtn.addEventListener("click", async () => {
           if (!publicKey) {
             try {
-              await wallet.connect();
-              publicKey = wallet.publicKey;
-              connectButton.textContent = `Connected: ${publicKey.toBase58().slice(0, 4)}...`;
+              const provider = window.solana; // Phantom wallet provider
+              if (!provider || !provider.isPhantom) {
+                throw new Error("Phantom wallet not found. Please install the Phantom extension.");
+              }
+
+              await provider.connect();
+              publicKey = new web3.PublicKey(provider.publicKey.toString());
+              connectWalletBtn.textContent = `Connected: ${publicKey.toBase58().slice(0, 4)}...`;
               connectMessage.style.display = "none";
               fetchLotteryData();
             } catch (error) {
@@ -278,9 +278,9 @@
               errorMessage.textContent = "Failed to connect wallet: " + error.message;
             }
           } else {
-            await wallet.disconnect();
+            await window.solana.disconnect();
             publicKey = null;
-            connectButton.textContent = "Connect Wallet";
+            connectWalletBtn.textContent = "Connect Wallet";
             connectMessage.style.display = "block";
             errorMessage.textContent = "";
             initializeSection.style.display = "none";
@@ -288,27 +288,29 @@
           }
         });
 
-        wallet.on("connect", () => {
-          publicKey = wallet.publicKey;
-          connectButton.textContent = `Connected: ${publicKey.toBase58().slice(0, 4)}...`;
-          connectMessage.style.display = "none";
-          fetchLotteryData();
-        });
+        if (window.solana && window.solana.isPhantom) {
+          window.solana.on("connect", () => {
+            publicKey = new web3.PublicKey(window.solana.publicKey.toString());
+            connectWalletBtn.textContent = `Connected: ${publicKey.toBase58().slice(0, 4)}...`;
+            connectMessage.style.display = "none";
+            fetchLotteryData();
+          });
 
-        wallet.on("disconnect", () => {
-          publicKey = null;
-          connectButton.textContent = "Connect Wallet";
-          connectMessage.style.display = "block";
-          errorMessage.textContent = "";
-          initializeSection.style.display = "none";
-          panelContent.style.display = "none";
-        });
+          window.solana.on("disconnect", () => {
+            publicKey = null;
+            connectWalletBtn.textContent = "Connect Wallet";
+            connectMessage.style.display = "block";
+            errorMessage.textContent = "";
+            initializeSection.style.display = "none";
+            panelContent.style.display = "none";
+          });
+        }
       }
 
       // Fetch the program
       async function getProgram() {
         const connection = new web3.Connection(web3.clusterApiUrl("devnet"), "confirmed");
-        const provider = new AnchorProvider(connection, wallet, {});
+        const provider = new AnchorProvider(connection, window.solana, {});
         
         // Fetch the IDL
         const response = await fetch("/lottery-admin-js/idl.json"); // Adjust for your repo name
@@ -333,6 +335,12 @@
           initializeSection.style.display = "none";
           panelContent.style.display = "none";
 
+          // Check if the connected wallet is the authority
+          const connectedWallet = publicKey.toBase58();
+          if (connectedWallet !== AUTHORITY_PUBLIC_KEY) {
+            throw new Error("You are not the authority of this lottery.");
+          }
+
           program = await getProgram();
           const [lotteryPda] = await web3.PublicKey.findProgramAddress(
             [Buffer.from("lottery")],
@@ -340,14 +348,6 @@
           );
 
           lotteryData = await program.account.lottery.fetch(lotteryPda);
-
-          // Check if the connected wallet is the authority
-          const authority = lotteryData.authority.toBase58();
-          const connectedWallet = publicKey.toBase58();
-          if (authority !== connectedWallet) {
-            throw new Error("You are not the authority of this lottery.");
-          }
-
           updateUI();
         } catch (error) {
           console.error("Error fetching lottery data:", error);
