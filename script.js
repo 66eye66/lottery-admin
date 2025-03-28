@@ -1,5 +1,7 @@
 const borsh = window.borsh || {};
-const { serialize, deserialize, BinaryWriter, BinaryReader } = borsh;
+const { serialize, deserialize, BinaryWriter, BinaryReader  } = require('borsh');
+
+//const { serialize, deserialize, BinaryWriter, BinaryReader } = borsh;
 
 if (!serialize || !deserialize) {
     console.error("Borsh library not loaded correctly.");
