@@ -21,16 +21,18 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
 }
 
 header h1 {
-    font-size: 24px;
+    font-size: 28px;
+    font-weight: bold;
 }
 
 header h1 span {
     font-size: 16px;
     color: #a1a1a1;
+    font-weight: normal;
 }
 
 #connect-wallet {
@@ -49,8 +51,8 @@ header h1 span {
 }
 
 .content {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 20px;
 }
 
@@ -58,27 +60,20 @@ header h1 span {
     display: none;
 }
 
-.quick-stats, .ticket-management, .recent-draws {
+.quick-stats, .ticket-management, .lottery-controls, .recent-draws {
     background: rgba(0, 0, 0, 0.5);
     border-radius: 15px;
     padding: 20px;
-    flex: 1;
-    min-width: 300px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
-.quick-stats h2, .ticket-management h2, .recent-draws h2 {
+.quick-stats h2, .ticket-management h2, .lottery-controls h2, .recent-draws h2 {
     font-size: 18px;
     margin-bottom: 20px;
+    color: #fff;
 }
 
-.stat-card, .draw-card, .current-price {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    padding: 15px;
-    margin-bottom: 10px;
-}
-
-.stat-card p, .draw-card p, .current-price p {
+-removed {
     font-size: 14px;
     color: #a1a1a1;
 }
@@ -86,20 +81,21 @@ header h1 span {
 .stat-card h3, .draw-card h3, .current-price h3 {
     font-size: 24px;
     margin-top: 5px;
+    color: #fff;
 }
 
-.ticket-form {
+.ticket-form, .control-card {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
-.ticket-form label {
+.ticket-form label, .control-card label {
     font-size: 14px;
     color: #a1a1a1;
 }
 
-.ticket-form input {
+.ticket-form input, .control-card input {
     background: rgba(255, 255, 255, 0.1);
     border: none;
     padding: 10px;
@@ -108,7 +104,7 @@ header h1 span {
     font-size: 14px;
 }
 
-#generate-tickets {
+#generate-tickets, #set-ticket-price, #draw-lottery, #withdraw-funds {
     background: linear-gradient(90deg, #ff00ff, #ff69b4);
     border: none;
     padding: 10px;
@@ -119,6 +115,11 @@ header h1 span {
     transition: transform 0.2s;
 }
 
-#generate-tickets:hover {
+#generate-tickets:hover, #set-ticket-price:hover, #draw-lottery:hover, #withdraw-funds:hover {
     transform: scale(1.05);
+}
+
+.control-card p {
+    font-size: 14px;
+    color: #a1a1a1;
 }
