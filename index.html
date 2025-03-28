@@ -1,475 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Lottery Admin</title>
-    <style>
-      body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        background: #1a1a1a;
-        color: #ffffff;
-      }
-
-      #app {
-        padding: 20px;
-        max-width: 1200px;
-        margin: 0 auto;
-      }
-
-      header {
-        background: #2c3e50;
-        padding: 15px 20px;
-        border-radius: 5px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-
-      header h1 {
-        margin: 0;
-        font-size: 24px;
-        font-weight: bold;
-      }
-
-      #wallet-connect button {
-        background: #3498db;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 16px;
-      }
-
-      #wallet-connect button:hover {
-        background: #2980b9;
-      }
-
-      #error-message {
-        color: #ff5555;
-        margin-top: 10px;
-        font-size: 14px;
-      }
-
-      #connect-message {
-        color: #ffffff;
-        margin-top: 10px;
-        font-size: 16px;
-      }
-
-      #initialize-section {
-        margin-top: 20px;
-        display: none;
-      }
-
-      #initialize-btn {
-        background: #3498db;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 16px;
-      }
-
-      #initialize-btn:hover {
-        background: #2980b9;
-      }
-
-      #panel-content {
-        margin-top: 20px;
-        display: none;
-        flex-wrap: wrap;
-        gap: 20px;
-      }
-
-      .section {
-        background: #2c3e50;
-        padding: 20px;
-        border-radius: 5px;
-        flex: 1;
-        min-width: 300px;
-      }
-
-      .section h3 {
-        margin: 0 0 15px;
-        font-size: 18px;
-        font-weight: bold;
-        color: #ffffff;
-      }
-
-      .stat {
-        margin-bottom: 15px;
-      }
-
-      .stat p {
-        margin: 0;
-        font-size: 14px;
-        color: #a0a0a0;
-      }
-
-      .stat h4 {
-        margin: 5px 0 0;
-        font-size: 18px;
-        color: #ffffff;
-      }
-
-      .ticket-form,
-      .ticket-price {
-        margin-bottom: 20px;
-      }
-
-      .ticket-form label,
-      .ticket-price label {
-        display: block;
-        margin-bottom: 5px;
-        font-size: 14px;
-        color: #a0a0a0;
-      }
-
-      .ticket-form input,
-      .ticket-price input {
-        width: 100%;
-        padding: 8px;
-        margin-bottom: 10px;
-        border: 1px solid #444;
-        border-radius: 5px;
-        background: #1a1a1a;
-        color: #ffffff;
-        font-size: 14px;
-      }
-
-      .ticket-form button,
-      .ticket-price button {
-        background: #3498db;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 16px;
-      }
-
-      .ticket-form button:hover,
-      .ticket-price button:hover {
-        background: #2980b9;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="app">
-      <header>
-        <h1>ADMIN PANEL</h1>
-        <div id="wallet-connect">
-          <button id="connect-wallet-btn">Connect Wallet</button>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lottery Admin Panel</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Admin Panel <span>Lottery Management System</span></h1>
+            <button id="connect-wallet">Connect Wallet</button>
+        </header>
+        <div id="admin-content" class="content hidden">
+            <div class="quick-stats">
+                <h2>Quick Stats</h2>
+                <div class="stat-card">
+                    <p>Total Participants</p>
+                    <h3 id="total-participants">0</h3>
+                </div>
+                <div class="stat-card">
+                    <p>Active Tickets</p>
+                    <h3 id="active-tickets">0</h3>
+                </div>
+                <div class="stat-card">
+                    <p>Total Revenue</p>
+                    <h3 id="total-revenue">0 SOL</h3>
+                </div>
+                <div class="stat-card">
+                    <p>Referral Earnings</p>
+                    <h3 id="referral-earnings">0 SOL</h3>
+                </div>
+            </div>
+            <div class="ticket-management">
+                <h2>Ticket Management</h2>
+                <div class="current-price">
+                    <p>Current Price</p>
+                    <h3 id="ticket-price">0 SOL</h3>
+                </div>
+                <div class="ticket-form">
+                    <label>Number of Tickets</label>
+                    <input type="number" id="ticket-count" placeholder="Enter quantity">
+                    <label>Referral Address (Optional)</label>
+                    <input type="text" id="referral-address" placeholder="Paste address here">
+                    <button id="generate-tickets">Generate Tickets</button>
+                </div>
+            </div>
+            <div class="recent-draws">
+                <h2>Recent Draws</h2>
+                <div class="draw-card">
+                    <p>#<span id="draw-number-1">0</span></p>
+                    <p id="draw-date-1">YYYY-MM-DD</p>
+                </div>
+                <div class="draw-card">
+                    <p>L1 Referrals</p>
+                    <h3 id="l1-referrals-1">0</h3>
+                </div>
+                <div class="draw-card">
+                    <p>L2 Referrals</p>
+                    <h3 id="l2-referrals-1">0</h3>
+                </div>
+                <div class="draw-card">
+                    <p>L1 Volume</p>
+                    <h3 id="l1-volume-1">0 SOL</h3>
+                </div>
+                <div class="draw-card">
+                    <p>L2 Volume</p>
+                    <h3 id="l2-volume-1">0 SOL</h3>
+                </div>
+            </div>
         </div>
-      </header>
-      <div id="error-message"></div>
-      <div id="connect-message">Please connect your wallet to access the admin panel.</div>
-      <div id="initialize-section">
-        <button id="initialize-btn">Initialize Lottery</button>
-      </div>
-      <div id="panel-content">
-        <div class="section" id="quick-stats">
-          <h3>Quick Stats</h3>
-          <div class="stat">
-            <p>Total Participants</p>
-            <h4 id="total-participants">0</h4>
-          </div>
-          <div class="stat">
-            <p>Active Tickets</p>
-            <h4 id="active-tickets">0</h4>
-          </div>
-          <div class="stat">
-            <p>Total Revenue</p>
-            <h4 id="total-revenue">0 SOL</h4>
-          </div>
-          <div class="stat">
-            <p>Referral Earnings</p>
-            <h4 id="referral-earnings">0 SOL</h4>
-          </div>
-        </div>
-        <div class="section" id="ticket-management">
-          <h3>Ticket Management</h3>
-          <div class="ticket-form">
-            <label>Number of Tickets</label>
-            <input type="number" id="ticket-count" placeholder="Enter quantity" />
-            <label>Referral Address (Optional)</label>
-            <input type="text" id="referral-address" placeholder="Paste address here" />
-            <button id="generate-tickets-btn">Generate Tickets</button>
-          </div>
-          <div class="ticket-price">
-            <label>Current Price: <span id="current-price">0.1 SOL</span></label>
-            <input type="number" id="ticket-price" placeholder="Set new ticket price (SOL)" />
-            <button id="set-ticket-price-btn">Set Ticket Price</button>
-          </div>
-        </div>
-        <div class="section" id="recent-draws">
-          <h3>Recent Draws</h3>
-          <p>No recent draws available.</p>
-        </div>
-      </div>
     </div>
-
-    <!-- Load dependencies via CDN -->
-    <script src="https://unpkg.com/@solana/web3.js@1.95.3/dist/index.global.js"></script>
-    <script src="https://unpkg.com/@project-serum/anchor@0.26.0/dist/index.global.js"></script>
-    <script src="https://unpkg.com/buffer@6.0.3/index.js"></script>
-    <script>
-      // Make Buffer available globally
-      window.Buffer = window.Buffer || buffer.Buffer;
-
-      // DOM elements
-      const connectWalletBtn = document.getElementById("connect-wallet-btn");
-      const errorMessage = document.getElementById("error-message");
-      const connectMessage = document.getElementById("connect-message");
-      const initializeSection = document.getElementById("initialize-section");
-      const initializeBtn = document.getElementById("initialize-btn");
-      const panelContent = document.getElementById("panel-content");
-      const totalParticipants = document.getElementById("total-participants");
-      const activeTickets = document.getElementById("active-tickets");
-      const totalRevenue = document.getElementById("total-revenue");
-      const referralEarnings = document.getElementById("referral-earnings");
-      const currentPrice = document.getElementById("current-price");
-      const ticketCountInput = document.getElementById("ticket-count");
-      const referralAddressInput = document.getElementById("referral-address");
-      const generateTicketsBtn = document.getElementById("generate-tickets-btn");
-      const ticketPriceInput = document.getElementById("ticket-price");
-      const setTicketPriceBtn = document.getElementById("set-ticket-price-btn");
-
-      // Wallet setup
-      const { web3, AnchorProvider, Program } = window;
-      let publicKey = null;
-      let program = null;
-      let lotteryData = null;
-      const programID = new web3.PublicKey("DfCSQQ6a3CTHf92X9YF7MiitMRbNaZZfbgFZ4yQrbcCd");
-
-      // Hardcode the authority public key (replace with the actual authority key)
-      const AUTHORITY_PUBLIC_KEY = "5wkwqRCEUoet55caXpVB6oYnuP8w8k97eqHbFfFiRdLD"; // Replace with the actual authority key
-
-      // Initialize wallet connection
-      function initWallet() {
-        connectWalletBtn.addEventListener("click", async () => {
-          if (!publicKey) {
-            try {
-              const provider = window.solana; // Phantom wallet provider
-              if (!provider || !provider.isPhantom) {
-                throw new Error("Phantom wallet not found. Please install the Phantom extension.");
-              }
-
-              await provider.connect();
-              publicKey = new web3.PublicKey(provider.publicKey.toString());
-              connectWalletBtn.textContent = `Connected: ${publicKey.toBase58().slice(0, 4)}...`;
-              connectMessage.style.display = "none";
-              fetchLotteryData();
-            } catch (error) {
-              console.error("Error connecting wallet:", error);
-              errorMessage.textContent = "Failed to connect wallet: " + error.message;
-            }
-          } else {
-            await window.solana.disconnect();
-            publicKey = null;
-            connectWalletBtn.textContent = "Connect Wallet";
-            connectMessage.style.display = "block";
-            errorMessage.textContent = "";
-            initializeSection.style.display = "none";
-            panelContent.style.display = "none";
-          }
-        });
-
-        if (window.solana && window.solana.isPhantom) {
-          window.solana.on("connect", () => {
-            publicKey = new web3.PublicKey(window.solana.publicKey.toString());
-            connectWalletBtn.textContent = `Connected: ${publicKey.toBase58().slice(0, 4)}...`;
-            connectMessage.style.display = "none";
-            fetchLotteryData();
-          });
-
-          window.solana.on("disconnect", () => {
-            publicKey = null;
-            connectWalletBtn.textContent = "Connect Wallet";
-            connectMessage.style.display = "block";
-            errorMessage.textContent = "";
-            initializeSection.style.display = "none";
-            panelContent.style.display = "none";
-          });
-        }
-      }
-
-      // Fetch the program
-      async function getProgram() {
-        const connection = new web3.Connection(web3.clusterApiUrl("devnet"), "confirmed");
-        const provider = new AnchorProvider(connection, window.solana, {});
-        
-        // Fetch the IDL
-        const response = await fetch("/lottery-admin/idl.json"); // Adjust for your repo name
-        if (!response.ok) {
-          throw new Error("Failed to fetch idl.json");
-        }
-        const idl = await response.json();
-
-        return new Program(idl, programID, provider);
-      }
-
-      // Fetch lottery data and check authority
-      async function fetchLotteryData() {
-        if (!publicKey) {
-          connectMessage.style.display = "block";
-          return;
-        }
-
-        try {
-          errorMessage.textContent = "";
-          initializeSection.style.display = "none";
-          panelContent.style.display = "none";
-
-          // Check if the connected wallet is the authority
-          const connectedWallet = publicKey.toBase58();
-          if (connectedWallet !== AUTHORITY_PUBLIC_KEY) {
-            throw new Error("You are not the authority of this lottery.");
-          }
-
-          program = await getProgram();
-          const [lotteryPda] = await web3.PublicKey.findProgramAddress(
-            [Buffer.from("lottery")],
-            program.programId
-          );
-
-          lotteryData = await program.account.lottery.fetch(lotteryPda);
-          updateUI();
-        } catch (error) {
-          console.error("Error fetching lottery data:", error);
-          errorMessage.textContent = error.message;
-          if (error.message.includes("Account does not exist")) {
-            initializeSection.style.display = "block";
-          }
-        }
-      }
-
-      // Update UI with lottery data
-      function updateUI() {
-        if (!lotteryData) return;
-
-        panelContent.style.display = "flex";
-        totalParticipants.textContent = lotteryData.ticketCount?.toNumber() || 0;
-        activeTickets.textContent = lotteryData.ticketCount?.toNumber() || 0;
-        totalRevenue.textContent = `${(lotteryData.netPool?.toNumber() / web3.LAMPORTS_PER_SOL) || 0} SOL`;
-        referralEarnings.textContent = "0 SOL"; // Replace with actual data if available
-        currentPrice.textContent = `${(lotteryData.ticketPrice?.toNumber() / web3.LAMPORTS_PER_SOL) || 0.1} SOL`;
-      }
-
-      // Initialize lottery account
-      initializeBtn.addEventListener("click", async () => {
-        if (!publicKey) {
-          alert("Please connect your wallet");
-          return;
-        }
-
-        try {
-          const [lotteryPda] = await web3.PublicKey.findProgramAddress(
-            [Buffer.from("lottery")],
-            program.programId
-          );
-
-          await program.rpc.initialize({
-            accounts: {
-              lottery: lotteryPda,
-              authority: publicKey,
-              systemProgram: web3.SystemProgram.programId,
-            },
-          });
-
-          alert("Lottery initialized!");
-          fetchLotteryData();
-        } catch (error) {
-          console.error("Error initializing lottery:", error);
-          errorMessage.textContent = error.message;
-        }
-      });
-
-      // Generate tickets
-      generateTicketsBtn.addEventListener("click", async () => {
-        if (!publicKey) {
-          alert("Please connect your wallet");
-          return;
-        }
-
-        const ticketCount = parseInt(ticketCountInput.value);
-        if (!ticketCount || ticketCount <= 0) {
-          alert("Please enter a valid number of tickets");
-          return;
-        }
-
-        try {
-          const [lotteryPda] = await web3.PublicKey.findProgramAddress(
-            [Buffer.from("lottery")],
-            program.programId
-          );
-          const [userTicketPda] = await web3.PublicKey.findProgramAddress(
-            [Buffer.from("user_ticket"), publicKey.toBuffer()],
-            program.programId
-          );
-          const [userReferralPda] = await web3.PublicKey.findProgramAddress(
-            [Buffer.from("user_referral"), publicKey.toBuffer()],
-            program.programId
-          );
-
-          await program.rpc.buyTickets(new web3.BN(ticketCount), {
-            accounts: {
-              lottery: lotteryPda,
-              userTicket: userTicketPda,
-              userReferral: userReferralPda,
-              user: publicKey,
-              systemProgram: web3.SystemProgram.programId,
-            },
-          });
-
-          alert("Tickets generated!");
-          fetchLotteryData();
-        } catch (error) {
-          console.error("Error generating tickets:", error);
-          alert("Failed to generate tickets: " + error.message);
-        }
-      });
-
-      // Set ticket price
-      setTicketPriceBtn.addEventListener("click", async () => {
-        if (!publicKey) {
-          alert("Please connect your wallet");
-          return;
-        }
-
-        const ticketPrice = parseFloat(ticketPriceInput.value);
-        if (!ticketPrice || ticketPrice <= 0) {
-          alert("Please enter a valid ticket price");
-          return;
-        }
-
-        try {
-          const [lotteryPda] = await web3.PublicKey.findProgramAddress(
-            [Buffer.from("lottery")],
-            program.programId
-          );
-
-          await program.rpc.setTicketPrice(new web3.BN(ticketPrice * web3.LAMPORTS_PER_SOL), {
-            accounts: {
-              lottery: lotteryPda,
-              authority: publicKey,
-            },
-          });
-
-          alert("Ticket price updated!");
-          fetchLotteryData();
-        } catch (error) {
-          console.error("Error setting ticket price:", error);
-          alert("Failed to set ticket price: " + error.message);
-        }
-      });
-
-      // Initialize the app
-      initWallet();
-    </script>
-  </body>
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    <script src="script.js"></script>
+</body>
 </html>
