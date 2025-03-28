@@ -1,0 +1,124 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #1a0b2e, #3b1a5a);
+    color: #fff;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+header h1 {
+    font-size: 24px;
+}
+
+header h1 span {
+    font-size: 16px;
+    color: #a1a1a1;
+}
+
+#connect-wallet {
+    background: linear-gradient(90deg, #ff00ff, #00ffff);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+#connect-wallet:hover {
+    transform: scale(1.05);
+}
+
+.content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.hidden {
+    display: none;
+}
+
+.quick-stats, .ticket-management, .recent-draws {
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 15px;
+    padding: 20px;
+    flex: 1;
+    min-width: 300px;
+}
+
+.quick-stats h2, .ticket-management h2, .recent-draws h2 {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+.stat-card, .draw-card, .current-price {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 10px;
+}
+
+.stat-card p, .draw-card p, .current-price p {
+    font-size: 14px;
+    color: #a1a1a1;
+}
+
+.stat-card h3, .draw-card h3, .current-price h3 {
+    font-size: 24px;
+    margin-top: 5px;
+}
+
+.ticket-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ticket-form label {
+    font-size: 14px;
+    color: #a1a1a1;
+}
+
+.ticket-form input {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    color: #fff;
+    font-size: 14px;
+}
+
+#generate-tickets {
+    background: linear-gradient(90deg, #ff00ff, #ff69b4);
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+#generate-tickets:hover {
+    transform: scale(1.05);
+}
