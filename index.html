@@ -59,13 +59,6 @@
         font-size: 16px;
       }
 
-      #loading-message {
-        color: #ffffff;
-        margin-top: 10px;
-        font-size: 16px;
-        display: none;
-      }
-
       #initialize-section {
         margin-top: 20px;
         display: none;
@@ -175,7 +168,6 @@
       </header>
       <div id="error-message"></div>
       <div id="connect-message">Please connect your wallet to access the admin panel.</div>
-      <div id="loading-message">Loading...</div>
       <div id="initialize-section">
         <button id="initialize-btn">Initialize Lottery</button>
       </div>
@@ -233,7 +225,6 @@
       const connectWalletBtn = document.getElementById("connect-wallet-btn");
       const errorMessage = document.getElementById("error-message");
       const connectMessage = document.getElementById("connect-message");
-      const loadingMessage = document.getElementById("loading-message");
       const initializeSection = document.getElementById("initialize-section");
       const initializeBtn = document.getElementById("initialize-btn");
       const panelContent = document.getElementById("panel-content");
@@ -313,7 +304,7 @@
         const provider = new AnchorProvider(connection, window.solana, {});
         
         // Fetch the IDL
-        const response = await fetch("/lottery-admin-js/idl.json"); // Adjust for your repo name
+        const response = await fetch("/lottery-admin/idl.json"); // Adjust for your repo name
         if (!response.ok) {
           throw new Error("Failed to fetch idl.json");
         }
@@ -331,7 +322,6 @@
 
         try {
           errorMessage.textContent = "";
-          loadingMessage.style.display = "block";
           initializeSection.style.display = "none";
           panelContent.style.display = "none";
 
@@ -355,8 +345,6 @@
           if (error.message.includes("Account does not exist")) {
             initializeSection.style.display = "block";
           }
-        } finally {
-          loadingMessage.style.display = "none";
         }
       }
 
