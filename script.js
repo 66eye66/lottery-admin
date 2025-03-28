@@ -1,7 +1,14 @@
-// Use the borsh library directly (exposed as 'borsh' in the global scope)
+// Check if borsh is loaded
+if (typeof borsh === 'undefined') {
+    console.error('Borsh library not loaded. Please ensure the @coral-xyz/borsh script is included.');
+    alert('Failed to load required libraries. Please refresh the page or check your internet connection.');
+    throw new Error('Borsh library not loaded');
+}
+
+// Use the borsh library
 const { serialize, deserialize, BinaryWriter, BinaryReader } = borsh;
 
-// Define Borsh schemas manually since we're not using struct
+// Define Borsh schemas manually
 const publicKeySchema = {
     serialize: (value, writer) => {
         writer.writeFixedArray(value.toBuffer(), 32);
@@ -153,13 +160,13 @@ async function fetchLotteryData() {
         const lotteryAccount = await getLotteryAccount();
         const accountInfo = await connection.getAccountInfo(lotteryAccount);
         if (!accountInfo) {
-            throw new Error('Lottery account not found');
+            throw new Error('Lottery account not found. Please initialize the lottery.');
         }
 
         const lotteryData = LotterySchema.deserialize(accountInfo.data);
         return {
-            totalParticipants: lotteryData.ticketCount, // Approximation
-            activeTickets: lotteryData.ticketCount,
+            totalParticipants: Number(lotteryData.ticketCount), // Approximation
+            activeTickets: Number(lotteryData.ticketCount),
             totalRevenue: Number(lotteryData.netPool) / 1_000_000_000, // Convert lamports to SOL
             ticketPrice: Number(lotteryData.ticketPrice) / 1_000_000_000, // Convert lamports to SOL
         };
@@ -240,7 +247,7 @@ connectWalletButton.addEventListener('click', async () => {
         }
     } catch (error) {
         console.error('Error connecting to wallet or fetching data:', error);
-        alert('Failed to connect wallet or fetch data. Please try again.');
+        alert('Failed to connect wallet or fetch data. Please ensure the lottery is initialized and try again.');
     }
 });
 
@@ -415,7 +422,7 @@ drawLotteryButton.addEventListener('click', async () => {
         const userPublicKey = window.solana.publicKey;
         const lotteryAccount = await getLotteryAccount();
 
-        // Placeholder winner accounts (in a real scenario, implement winner selection logic)
+        // Placeholder winner accounts (implement winner selection logic in a real scenario)
         const winner1 = new solanaWeb3.PublicKey('11111111111111111111111111111111');
         const winner2 = new solanaWeb3.PublicKey('22222222222222222222222222222222');
         const winner3 = new solanaWeb3.PublicKey('33333333333333333333333333333333');
