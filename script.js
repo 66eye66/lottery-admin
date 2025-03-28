@@ -1,3 +1,11 @@
+const borsh = window.borsh || {};
+const { serialize, deserialize, BinaryWriter, BinaryReader } = borsh;
+
+if (!serialize || !deserialize) {
+    console.error("Borsh library not loaded correctly.");
+}
+
+
 // Check if borsh is loaded
 if (typeof borsh === 'undefined') {
     console.error('Borsh library not loaded. Please ensure the @coral-xyz/borsh script is included.');
