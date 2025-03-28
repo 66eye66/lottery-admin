@@ -1,19 +1,22 @@
-// Import Solana web3.js (already included in index.html via CDN)
-const { Connection, PublicKey, Transaction, SystemProgram, AccountMeta } = window.solanaWeb3;
-const { struct, u64, bool, i64, publicKey } = window.Borsh; // For Borsh serialization (you may need to include a Borsh library)
+// Import Solana web3.js and Borsh
+const { Connection, PublicKey, Transaction, SystemProgram } = window.solanaWeb3;
+const { struct, u64, bool, i64, publicKey } = window.Borsh;
 
 // UI Elements
 const connectWalletButton = document.getElementById('connect-wallet');
 const adminContent = document.getElementById('admin-content');
 const generateTicketsButton = document.getElementById('generate-tickets');
+const setTicketPriceButton = document.getElementById('set-ticket-price');
+const drawLotteryButton = document.getElementById('draw-lottery');
+const withdrawFundsButton = document.getElementById('withdraw-funds');
 
-// Program ID from your code
+// Program ID
 const PROGRAM_ID = new PublicKey('DfCSQQ6a3CTHf92X9YF7MiitMRbNaZZfbgFZ4yQrbcCd');
 
 // Connection to Solana devnet
 const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
 
-// Lottery account structure (based on your program's Lottery struct)
+// Lottery account structure
 const LotterySchema = struct({
     owner: publicKey(),
     netPool: u64(),
@@ -23,7 +26,7 @@ const LotterySchema = struct({
     ticketPrice: u64(),
 });
 
-// Referral account structure (based on your program's ReferralAccount struct)
+// Referral account structure
 const ReferralAccountSchema = struct({
     parent: publicKey(),
     l1Count: u64(),
@@ -33,16 +36,14 @@ const ReferralAccountSchema = struct({
     totalEarnings: u64(),
 });
 
-// User ticket account structure (based on your program's UserTicket struct)
+// User ticket account structure
 const UserTicketSchema = struct({
     owner: publicKey(),
     count: u64(),
 });
 
-// Function to derive the lottery account PDA (assuming the lottery account is a PDA)
+// Derive the lottery account PDA
 async function getLotteryAccount() {
-    // In a real scenario, you need to know the seed used to create the lottery account.
-    // For simplicity, let's assume the lottery account is a PDA with a known seed (e.g., "lottery").
     const [lotteryPDA, _] = await PublicKey.findProgramAddress(
         [Buffer.from('lottery')],
         PROGRAM_ID
@@ -50,7 +51,7 @@ async function getLotteryAccount() {
     return lotteryPDA;
 }
 
-// Function to derive the user ticket account PDA
+// Derive the user ticket account PDA
 async function getUserTicketAccount(userPublicKey) {
     const [userTicketPDA, _] = await PublicKey.findProgramAddress(
         [Buffer.from('user_ticket'), userPublicKey.toBuffer()],
@@ -59,7 +60,7 @@ async function getUserTicketAccount(userPublicKey) {
     return userTicketPDA;
 }
 
-// Function to derive the user referral account PDA
+// Derive the user referral account PDA
 async function getUserReferralAccount(userPublicKey) {
     const [userReferralPDA, _] = await PublicKey.findProgramAddress(
         [Buffer.from('user_referral'), userPublicKey.toBuffer()],
@@ -68,7 +69,7 @@ async function getUserReferralAccount(userPublicKey) {
     return userReferralPDA;
 }
 
-// Function to fetch lottery data
+// Fetch lottery data
 async function fetchLotteryData() {
     const lotteryAccount = await getLotteryAccount();
     const accountInfo = await connection.getAccountInfo(lotteryAccount);
@@ -76,38 +77,35 @@ async function fetchLotteryData() {
         throw new Error('Lottery account not found');
     }
 
-    // Deserialize the lottery account data
     const lotteryData = LotterySchema.deserialize(accountInfo.data);
     return {
-        totalParticipants: lotteryData.ticketCount, // Approximation (you may need a separate counter for unique participants)
+        totalParticipants: lotteryData.ticketCount, // Approximation
         activeTickets: lotteryData.ticketCount,
         totalRevenue: lotteryData.netPool / 1_000_000_000, // Convert lamports to SOL
         ticketPrice: lotteryData.ticketPrice / 1_000_000_000, // Convert lamports to SOL
     };
 }
 
-// Function to fetch referral earnings for the connected user
+// Fetch referral earnings
 async function fetchReferralEarnings(userPublicKey) {
     const referralAccount = await getUserReferralAccount(userPublicKey);
     const accountInfo = await connection.getAccountInfo(referralAccount);
     if (!accountInfo) {
-        return 0; // No referral account yet
+        return 0;
     }
 
-    // Deserialize the referral account data
     const referralData = ReferralAccountSchema.deserialize(accountInfo.data);
     return referralData.totalEarnings / 1_000_000_000; // Convert lamports to SOL
 }
 
-// Function to fetch recent draws (mocked for now, as the program doesn't store historical draws)
+// Mock recent draws (since the contract doesn't store this)
 function fetchRecentDraws() {
-    // In a real scenario, you would need to store draw history in the program or off-chain
     return [
         { number: 256, date: '2024-03-15', l1Referrals: 15, l2Referrals: 32, l1Volume: 150.50, l2Volume: 275.00 }
     ];
 }
 
-// Function to populate the UI with data
+// Populate the UI
 function populateUI(data) {
     document.getElementById('total-participants').textContent = data.totalParticipants;
     document.getElementById('active-tickets').textContent = data.activeTickets;
@@ -130,16 +128,13 @@ function populateUI(data) {
 connectWalletButton.addEventListener('click', async () => {
     try {
         if (window.solana && window.solana.isPhantom) {
-            // Connect to Phantom wallet
             await window.solana.connect();
             const userPublicKey = window.solana.publicKey;
             console.log('Connected to wallet:', userPublicKey.toString());
 
-            // Show the admin content
             adminContent.classList.remove('hidden');
             connectWalletButton.textContent = 'Wallet Connected';
 
-            // Fetch and populate data
             const lotteryData = await fetchLotteryData();
             const referralEarnings = await fetchReferralEarnings(userPublicKey);
             const recentDraws = fetchRecentDraws();
@@ -161,7 +156,7 @@ connectWalletButton.addEventListener('click', async () => {
     }
 });
 
-// Handle ticket generation
+// Generate tickets
 generateTicketsButton.addEventListener('click', async () => {
     try {
         const ticketCount = parseInt(document.getElementById('ticket-count').value);
@@ -182,7 +177,6 @@ generateTicketsButton.addEventListener('click', async () => {
         const userTicketAccount = await getUserTicketAccount(userPublicKey);
         const userReferralAccount = await getUserReferralAccount(userPublicKey);
 
-        // Prepare accounts for the buyTickets instruction
         const accounts = [
             { pubkey: lotteryAccount, isSigner: false, isWritable: true },
             { pubkey: userTicketAccount, isSigner: false, isWritable: true },
@@ -191,7 +185,6 @@ generateTicketsButton.addEventListener('click', async () => {
             { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
         ];
 
-        // Add referral accounts if a referral address is provided
         let l1Referrer = null;
         let l1ReferralAccount = null;
         let l2Referrer = null;
@@ -208,7 +201,6 @@ generateTicketsButton.addEventListener('click', async () => {
             accounts.push({ pubkey: l1Referrer, isSigner: false, isWritable: false });
             accounts.push({ pubkey: l1ReferralAccount, isSigner: false, isWritable: true });
 
-            // Fetch L1 referral account to get L2 referrer
             const l1ReferralInfo = await connection.getAccountInfo(l1ReferralAccount);
             if (l1ReferralInfo) {
                 const l1ReferralData = ReferralAccountSchema.deserialize(l1ReferralInfo.data);
@@ -226,10 +218,9 @@ generateTicketsButton.addEventListener('click', async () => {
             }
         }
 
-        // Create the buyTickets instruction
-        const instructionData = Buffer.alloc(9); // 1 byte for instruction index, 8 bytes for ticketCount (u64)
-        instructionData.writeUInt8(1, 0); // Instruction index for buyTickets (from your program: 1)
-        instructionData.writeBigUInt64LE(BigInt(ticketCount), 1); // ticketCount as u64
+        const instructionData = Buffer.alloc(9);
+        instructionData.writeUInt8(1, 0); // buyTickets instruction index
+        instructionData.writeBigUInt64LE(BigInt(ticketCount), 1);
 
         const transaction = new Transaction().add({
             programId: PROGRAM_ID,
@@ -237,7 +228,6 @@ generateTicketsButton.addEventListener('click', async () => {
             data: instructionData,
         });
 
-        // Sign and send the transaction
         const { blockhash } = await connection.getLatestBlockhash();
         transaction.recentBlockhash = blockhash;
         transaction.feePayer = userPublicKey;
@@ -247,7 +237,6 @@ generateTicketsButton.addEventListener('click', async () => {
 
         alert(`Successfully generated ${ticketCount} tickets! Transaction signature: ${signedTransaction.signature}`);
 
-        // Refresh the UI after generating tickets
         const updatedLotteryData = await fetchLotteryData();
         const updatedReferralEarnings = await fetchReferralEarnings(userPublicKey);
         const recentDraws = fetchRecentDraws();
@@ -263,5 +252,189 @@ generateTicketsButton.addEventListener('click', async () => {
     } catch (error) {
         console.error('Error generating tickets:', error);
         alert('Failed to generate tickets. Please try again.');
+    }
+});
+
+// Set ticket price
+setTicketPriceButton.addEventListener('click', async () => {
+    try {
+        const newPriceSol = parseFloat(document.getElementById('new-ticket-price').value);
+        if (!newPriceSol || newPriceSol < 0.001) { // Minimum price check (1_000_000 lamports)
+            alert('Please enter a valid ticket price (minimum 0.001 SOL).');
+            return;
+        }
+
+        if (!window.solana || !window.solana.publicKey) {
+            alert('Please connect your wallet first.');
+            return;
+        }
+
+        const userPublicKey = window.solana.publicKey;
+        const lotteryAccount = await getLotteryAccount();
+
+        const newPriceLamports = Math.round(newPriceSol * 1_000_000_000); // Convert SOL to lamports
+
+        const accounts = [
+            { pubkey: lotteryAccount, isSigner: false, isWritable: true },
+            { pubkey: userPublicKey, isSigner: true, isWritable: false },
+        ];
+
+        const instructionData = Buffer.alloc(9);
+        instructionData.writeUInt8(4, 0); // setTicketPrice instruction index
+        instructionData.writeBigUInt64LE(BigInt(newPriceLamports), 1);
+
+        const transaction = new Transaction().add({
+            programId: PROGRAM_ID,
+            keys: accounts,
+            data: instructionData,
+        });
+
+        const { blockhash } = await connection.getLatestBlockhash();
+        transaction.recentBlockhash = blockhash;
+        transaction.feePayer = userPublicKey;
+
+        const signedTransaction = await window.solana.signAndSendTransaction(transaction);
+        await connection.confirmTransaction(signedTransaction.signature);
+
+        alert(`Successfully set ticket price to ${newPriceSol} SOL! Transaction signature: ${signedTransaction.signature}`);
+
+        const updatedLotteryData = await fetchLotteryData();
+        const updatedReferralEarnings = await fetchReferralEarnings(userPublicKey);
+        const recentDraws = fetchRecentDraws();
+
+        populateUI({
+            totalParticipants: updatedLotteryData.totalParticipants,
+            activeTickets: updatedLotteryData.activeTickets,
+            totalRevenue: updatedLotteryData.totalRevenue,
+            referralEarnings: updatedReferralEarnings,
+            ticketPrice: updatedLotteryData.ticketPrice,
+            recentDraws: recentDraws,
+        });
+    } catch (error) {
+        console.error('Error setting ticket price:', error);
+        alert('Failed to set ticket price. Please try again.');
+    }
+});
+
+// Draw lottery
+drawLotteryButton.addEventListener('click', async () => {
+    try {
+        if (!window.solana || !window.solana.publicKey) {
+            alert('Please connect your wallet first.');
+            return;
+        }
+
+        const userPublicKey = window.solana.publicKey;
+        const lotteryAccount = await getLotteryAccount();
+
+        // In a real scenario, you need to specify the winner accounts
+        // For this example, we'll use placeholder public keys (you should fetch or generate these)
+        const winner1 = new PublicKey('11111111111111111111111111111111'); // Placeholder
+        const winner2 = new PublicKey('22222222222222222222222222222222'); // Placeholder
+        const winner3 = new PublicKey('33333333333333333333333333333333'); // Placeholder
+
+        const accounts = [
+            { pubkey: lotteryAccount, isSigner: false, isWritable: true },
+            { pubkey: userPublicKey, isSigner: true, isWritable: false },
+            { pubkey: winner1, isSigner: false, isWritable: true },
+            { pubkey: winner2, isSigner: false, isWritable: true },
+            { pubkey: winner3, isSigner: false, isWritable: true },
+            { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+        ];
+
+        const instructionData = Buffer.alloc(1);
+        instructionData.writeUInt8(2, 0); // draw instruction index
+
+        const transaction = new Transaction().add({
+            programId: PROGRAM_ID,
+            keys: accounts,
+            data: instructionData,
+        });
+
+        const { blockhash } = await connection.getLatestBlockhash();
+        transaction.recentBlockhash = blockhash;
+        transaction.feePayer = userPublicKey;
+
+        const signedTransaction = await window.solana.signAndSendTransaction(transaction);
+        await connection.confirmTransaction(signedTransaction.signature);
+
+        alert(`Successfully drew the lottery! Transaction signature: ${signedTransaction.signature}`);
+
+        const updatedLotteryData = await fetchLotteryData();
+        const updatedReferralEarnings = await fetchReferralEarnings(userPublicKey);
+        const recentDraws = fetchRecentDraws();
+
+        populateUI({
+            totalParticipants: updatedLotteryData.totalParticipants,
+            activeTickets: updatedLotteryData.activeTickets,
+            totalRevenue: updatedLotteryData.totalRevenue,
+            referralEarnings: updatedReferralEarnings,
+            ticketPrice: updatedLotteryData.ticketPrice,
+            recentDraws: recentDraws,
+        });
+    } catch (error) {
+        console.error('Error drawing lottery:', error);
+        alert('Failed to draw lottery. Please try again.');
+    }
+});
+
+// Withdraw funds
+withdrawFundsButton.addEventListener('click', async () => {
+    try {
+        const amountSol = parseFloat(document.getElementById('withdraw-amount').value);
+        if (!amountSol || amountSol <= 0) {
+            alert('Please enter a valid amount to withdraw.');
+            return;
+        }
+
+        if (!window.solana || !window.solana.publicKey) {
+            alert('Please connect your wallet first.');
+            return;
+        }
+
+        const userPublicKey = window.solana.publicKey;
+        const lotteryAccount = await getLotteryAccount();
+
+        const amountLamports = Math.round(amountSol * 1_000_000_000); // Convert SOL to lamports
+
+        const accounts = [
+            { pubkey: lotteryAccount, isSigner: false, isWritable: true },
+            { pubkey: userPublicKey, isSigner: true, isWritable: true },
+        ];
+
+        const instructionData = Buffer.alloc(9);
+        instructionData.writeUInt8(3, 0); // withdraw instruction index
+        instructionData.writeBigUInt64LE(BigInt(amountLamports), 1);
+
+        const transaction = new Transaction().add({
+            programId: PROGRAM_ID,
+            keys: accounts,
+            data: instructionData,
+        });
+
+        const { blockhash } = await connection.getLatestBlockhash();
+        transaction.recentBlockhash = blockhash;
+        transaction.feePayer = userPublicKey;
+
+        const signedTransaction = await window.solana.signAndSendTransaction(transaction);
+        await connection.confirmTransaction(signedTransaction.signature);
+
+        alert(`Successfully withdrew ${amountSol} SOL! Transaction signature: ${signedTransaction.signature}`);
+
+        const updatedLotteryData = await fetchLotteryData();
+        const updatedReferralEarnings = await fetchReferralEarnings(userPublicKey);
+        const recentDraws = fetchRecentDraws();
+
+        populateUI({
+            totalParticipants: updatedLotteryData.totalParticipants,
+            activeTickets: updatedLotteryData.activeTickets,
+            totalRevenue: updatedLotteryData.totalRevenue,
+            referralEarnings: updatedReferralEarnings,
+            ticketPrice: updatedLotteryData.ticketPrice,
+            recentDraws: recentDraws,
+        });
+    } catch (error) {
+        console.error('Error withdrawing funds:', error);
+        alert('Failed to withdraw funds. Please try again.');
     }
 });
