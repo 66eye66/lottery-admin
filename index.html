@@ -13,6 +13,7 @@
             <button id="connect-wallet">Connect Wallet</button>
         </header>
         <div id="admin-content" class="content hidden">
+            <!-- Quick Stats Section -->
             <div class="quick-stats">
                 <h2>Quick Stats</h2>
                 <div class="stat-card">
@@ -32,6 +33,8 @@
                     <h3 id="referral-earnings">0 SOL</h3>
                 </div>
             </div>
+
+            <!-- Ticket Management Section -->
             <div class="ticket-management">
                 <h2>Ticket Management</h2>
                 <div class="current-price">
@@ -46,6 +49,28 @@
                     <button id="generate-tickets">Generate Tickets</button>
                 </div>
             </div>
+
+            <!-- Lottery Controls Section -->
+            <div class="lottery-controls">
+                <h2>Lottery Controls</h2>
+                <div class="control-card">
+                    <label>Set Ticket Price (SOL)</label>
+                    <input type="number" id="new-ticket-price" placeholder="Enter new price in SOL" step="0.01">
+                    <button id="set-ticket-price">Set Price</button>
+                </div>
+                <div class="control-card">
+                    <label>Draw Lottery</label>
+                    <p>Distribute prizes to winners</p>
+                    <button id="draw-lottery">Draw Lottery</button>
+                </div>
+                <div class="control-card">
+                    <label>Withdraw Funds (SOL)</label>
+                    <input type="number" id="withdraw-amount" placeholder="Enter amount in SOL" step="0.01">
+                    <button id="withdraw-funds">Withdraw</button>
+                </div>
+            </div>
+
+            <!-- Recent Draws Section -->
             <div class="recent-draws">
                 <h2>Recent Draws</h2>
                 <div class="draw-card">
@@ -72,6 +97,7 @@
         </div>
     </div>
     <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    <script src="https://unpkg.com/@coral-xyz/borsh@latest/dist/index.iife.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
