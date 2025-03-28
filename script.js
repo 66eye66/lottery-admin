@@ -1,3 +1,6 @@
+window.Buffer = window.Buffer || require("buffer").Buffer;
+
+
 // Connection to Solana devnet
 const connection = new solanaWeb3.Connection('https://api.devnet.solana.com', 'confirmed');
 
